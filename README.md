@@ -2,6 +2,9 @@
 
 Aplikasi web sederhana untuk pemesanan buku pada toko online. Proyek ini berfokus pada **front-end** (HTML, CSS, JavaScript). Tidak ada server maupun database. Data bawaan berasal dari `js/data.js`, sedangkan data baru yang dibuat pengguna disimpan di browser (`localStorage` dan `sessionStorage`).
 
+
+## Link Youtube : https://youtu.be/c5i-7vH_PqA
+
 ## Daftar Isi
 
 1. [Struktur Folder](#1-struktur-folder)
@@ -12,6 +15,7 @@ Aplikasi web sederhana untuk pemesanan buku pada toko online. Proyek ini berfoku
 6. [Penyimpanan Data](#6-penyimpanan-data)
 7. [Desain Tampilan](#7-desain-tampilan)
 8. [Catatan dan Batasan](#8-catatan-dan-batasan)
+9. [Capture Hasil Website](#9-Capture-Hasil-Website)
 
 ---
 
@@ -32,6 +36,7 @@ tugas-uts-web1/
 │   └── script.js     Fungsi bersama yang dipakai semua halaman
 ├── img/              Cover buku (sesuai isi "cover" di data.js)
 └── assets/           Aset tambahan, misalnya logo (opsional)
+
 ```
 
 Setiap halaman memuat `js/data.js` **sebelum** `js/script.js`, karena fungsi di `script.js` membaca variabel dari `data.js`.
@@ -175,3 +180,25 @@ Tampilan mengikuti pedoman *Book Store App* yang bersifat minimalis dan berfokus
 - Pesanan baru hanya memiliki satu langkah perjalanan ("diterima dan sedang diproses"). Perjalanan paket lengkap hanya ada pada data bawaan `dataTracking`.
 - Buku yang ditambahkan lewat form tidak memiliki gambar cover.
 - Link "Lupa Password" hanya simulasi dan tidak mengirim email.
+
+
+## 9. Capture Hasil Website
+
+# 1. Login
+![Login](tugas-uts-web1/screenshots/login.png)
+
+# 2. Dashboard
+![Dashboard](tugas-uts-web1/screenshots/dashboard.png)
+
+# 3. Katalog
+![Katalog](tugas-uts-web1/screenshots/katalog.png)
+
+# 4. Checkout
+![Checkout](tugas-uts-web1/screenshots/checkout.png)
+
+# 5. Tracking
+![Tracking](tugas-uts-web1/screenshots/tracking.png)
+
+# 6. Riwayat
+![Riwayat](tugas-uts-web1/screenshots/riwayat.png)
+
