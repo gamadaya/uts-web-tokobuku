@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="nav"></div>
+  <main>
+    <p class="muted" id="jam" style="margin:0"></p>
+    <h1 id="greet"></h1>
+    <form class="search" id="fCari"><input id="q" type="search" placeholder="Cari buku, kode, atau jenis..."
+        aria-label="Cari buku"></form>
+    <div class="sechead">
+      <h2>Menu</h2>
+    </div>
+    <div class="menu">
+      <a href="stok.html"><b>Informasi Stok / Katalog</b>Lihat dan tambah stok buku</a>
+      <a href="checkout.html"><b>Pemesanan</b>Buat pesanan baru</a>
+      <a href="tracking.html"><b>Tracking Pengiriman</b>Lacak dengan nomor DO</a>
+      <a href="riwayat.html?v=laporan"><b>Laporan Pemesanan</b>Ringkasan pesanan</a>
+      <a href="riwayat.html?v=history"><b>History Transaksi</b>Daftar transaksi Anda</a>
+    </div>
+    <div class="sechead">
+      <h2>Buku Tersedia</h2><a href="stok.html"><span>Lihat semua</span></a>
+    </div>
+    <div class="carousel" id="rak"></div>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    pasangNav("dashboard.html");
+    function tampil() {
+      var d = new Date(), h = d.getHours();
+      var s = h >= 4 && h < 11 ? "pagi" : h < 15 ? "siang" : h < 18 ? "sore" : "malam";
+      greet.textContent = "Selamat " + s + ", " + getUser().nama + "!";
+      jam.textContent = d.toLocaleString("id-ID", { dateStyle: "full", timeStyle: "medium" });
+    }
+    tampil(); setInterval(tampil, 1000);
+    fCari.onsubmit = e => { e.preventDefault(); location.href = "stok.html?q=" + encodeURIComponent(q.value.trim()); };
+    getKatalog().forEach(b => rak.appendChild(kartuBuku(b)));
+  </script>
+</body>
+
+</html>

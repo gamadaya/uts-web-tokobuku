@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tracking - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>Tracking Pengiriman</h1>
+    <div class="card">
+      <label for="noDO">Nomor Delivery Order</label>
+      <div style="display:flex;gap:.6rem"><input id="noDO" placeholder="contoh: 20230012"><button id="cari"
+          style="white-space:nowrap">Cari</button></div>
+    </div>
+    <div id="hasil"></div>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    pasangNav("tracking.html");
+    // pesanan dari checkout dibuat statusnya "Diproses"
+    function cariDO(no) {
+      if (dataTracking[no]) return dataTracking[no];
+      var o = getOrders().find(x => x.nomorDO === no);
+      if (!o) return null;
+      return {
+        nomorDO: o.nomorDO, nama: o.nama, status: "Diproses", ekspedisi: o.ekspedisi, tanggalKirim: o.tanggal,
+        paket: o.paket, total: rp(o.total), perjalanan: [{ waktu: o.tanggal + " " + o.waktu.split(" ").pop(), keterangan: "Pesanan diterima dan sedang diproses gudang" }]
+      };
+    }
+    var LEVEL = { "Diproses": 15, "Dikirim": 45, "Dalam Perjalanan": 75, "Selesai": 100 };
+    function tampil() {
+      var no = noDO.value.trim(), d = cariDO(no);
+      if (!d) { hasil.innerHTML = '<div class="card"><b>Nomor DO tidak ditemukan.</b> Periksa kembali nomor yang Anda masukkan.</div>'; return; }
+      var selesai = d.perjalanan.some(p => /selesai antar/i.test(p.keterangan));
+      var pct = selesai ? 100 : (LEVEL[d.status] || 30);
+      hasil.innerHTML = `<div class="card"><h2>DO ${d.nomorDO}</h2>
+  <p>Pemesan: <b>${d.nama}</b></p>
+  <p>Status: <span class="badge">${selesai ? "Selesai" : d.status}</span></p>
+  <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i class="${selesai ? "done" : ""}" style="width:${pct}%"></i></div>
+  <dl class="detail"><div><dt>Ekspedisi</dt><dd>${d.ekspedisi}</dd></div><div><dt>Tanggal kirim</dt><dd>${d.tanggalKirim}</dd></div><div><dt>Jenis paket</dt><dd>${d.paket}</dd></div><div><dt>Total pembayaran</dt><dd>${d.total}</dd></div></dl>
+  <h3 style="margin-top:1.2rem">Riwayat perjalanan</h3>
+  <ul class="steps">${d.perjalanan.map(p => `<li>${p.keterangan}<small>${p.waktu}</small></li>`).join("")}</ul></div>`;
+    }
+    cari.onclick = tampil;
+    noDO.onkeydown = e => { if (e.key === "Enter") tampil(); };
+    var q = new URLSearchParams(location.search).get("do");
+    if (q) { noDO.value = q; tampil(); }
+  </script>
+</body>
+
+</html>

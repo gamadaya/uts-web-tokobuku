@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Katalog - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>Informasi Stok Buku</h1>
+    <div class="search"><input id="cariStok" type="search" placeholder="Cari kode atau judul buku..."
+        aria-label="Cari buku"></div>
+    <div class="chips" id="chips"></div>
+    <p class="muted" id="jumlah"></p>
+    <div class="grid" id="grid"></div>
+
+    <form id="fTambah" class="card" style="margin-top:28px">
+      <h2>Tambah Stok Baru</h2>
+      <div class="row">
+        <div><label for="kode">Kode barang</label><input id="kode" required></div>
+        <div><label for="nama">Nama barang</label><input id="nama" required></div>
+        <div><label for="jenis">Jenis</label><input id="jenis" value="Buku Ajar" required></div>
+        <div><label for="edisi">Edisi</label><input id="edisi" type="number" min="1" required></div>
+        <div><label for="stok">Stok</label><input id="stok" type="number" min="0" required></div>
+        <div><label for="harga">Harga (Rp)</label><input id="harga" type="number" min="0" required></div>
+      </div>
+      <p><button>Tambah buku</button></p>
+    </form>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    pasangNav("stok.html");
+    var filter = "Semua";
+    cariStok.value = new URLSearchParams(location.search).get("q") || "";
+    function tampil() {
+      grid.innerHTML = "";
+      var q = cariStok.value.trim().toLowerCase();
+      var h = getKatalog().filter(b => (filter == "Semua" || b.jenisBarang == filter) && (b.namaBarang + " " + b.kodeBarang).toLowerCase().includes(q));
+      jumlah.textContent = h.length + " buku";
+      if (!h.length) { grid.innerHTML = '<p class="muted" style="grid-column:1/-1">Buku tidak ditemukan. Coba kata kunci lain.</p>'; return; }
+      h.forEach(b => grid.appendChild(kartuBuku(b)));
+    }
+    function buatChips() {
+      var j = ["Semua"].concat([...new Set(getKatalog().map(b => b.jenisBarang))]);
+      chips.innerHTML = "";
+      j.forEach(n => {
+        var c = document.createElement("button"); c.type = "button";
+        c.className = "chip" + (n == filter ? " on" : ""); c.textContent = n;
+        c.onclick = () => { filter = n; buatChips(); tampil(); };
+        chips.appendChild(c);
+      });
+    }
+    cariStok.oninput = tampil;
+    fTambah.onsubmit = function (e) {
+      e.preventDefault();
+      if (getKatalog().some(b => b.kodeBarang.toLowerCase() === kode.value.trim().toLowerCase()))
+        return alert("Kode barang sudah ada.");
+      var b = {
+        kodeBarang: kode.value.trim(), namaBarang: nama.value.trim(), jenisBarang: jenis.value.trim(),
+        edisi: edisi.value, stok: Number(stok.value), harga: rp(harga.value), cover: ""
+      };
+      var s = ambil("stokBaru", []); s.push(b); simpan("stokBaru", s);
+      filter = "Semua"; cariStok.value = ""; buatChips(); tampil();   // kartu baru dibuat lewat DOM (kartuBuku)
+      fTambah.reset(); jenis.value = "Buku Ajar";
+    };
+    buatChips(); tampil();
+  </script>
+</body>
+
+</html>

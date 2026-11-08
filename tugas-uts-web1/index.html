@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <main class="login">
+    <div class="card">
+      <h1>Masuk Toko Buku</h1>
+      <p class="muted">Gunakan akun Anda untuk memesan bahan ajar.</p>
+      <form id="fLogin"><label for="email">Email</label><input type="email" id="email" required>
+        <label for="pass">Password</label><input type="password" id="pass" required>
+        <p><button type="submit" style="width:100%">Login</button></p>
+      </form>
+      <button class="btn2" id="bLupa">Lupa Password</button> <button class="btn2" id="bDaftar">Daftar</button>
+    </div>
+  </main>
+
+  <div class="modal" id="mLupa">
+    <div class="box">
+      <h2>Lupa Password</h2>
+      <label for="lEmail">Email terdaftar</label><input type="email" id="lEmail">
+      <p><button id="kirimLupa">Kirim Link Reset</button> <button class="btn2 tutup">Tutup</button></p>
+    </div>
+  </div>
+
+  <div class="modal" id="mDaftar">
+    <div class="box">
+      <h2>Daftar Akun</h2>
+      <label for="dNama">Nama lengkap</label><input id="dNama">
+      <label for="dEmail">Email</label><input type="email" id="dEmail">
+      <label for="dPass">Password</label><input type="password" id="dPass">
+      <p><button id="simpanDaftar">Daftar</button> <button class="btn2 tutup">Tutup</button></p>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    var semuaUser = () => dataPengguna.concat(ambil("penggunaBaru", []));
+    document.getElementById("fLogin").onsubmit = function (e) {
+      e.preventDefault();
+      var em = email.value.trim().toLowerCase(), pw = pass.value;
+      var u = semuaUser().find(x => x.email.toLowerCase() === em && x.password === pw);
+      if (!u) { alert("Email/password yang anda masukkan salah"); return; }
+      sessionStorage.setItem("user", JSON.stringify(u));
+      location.href = "dashboard.html";
+    };
+    var buka = id => document.getElementById(id).classList.add("show");
+    bLupa.onclick = () => buka("mLupa");
+    bDaftar.onclick = () => buka("mDaftar");
+    document.querySelectorAll(".tutup").forEach(b => b.onclick = () => b.closest(".modal").classList.remove("show"));
+    kirimLupa.onclick = function () {
+      var em = lEmail.value.trim().toLowerCase();
+      if (!em) return alert("Isi email terlebih dahulu.");
+      var ada = semuaUser().some(x => x.email.toLowerCase() === em);
+      alert(ada ? "Link reset password telah dikirim ke " + em + " (simulasi)." : "Email tidak terdaftar.");
+      if (ada) mLupa.classList.remove("show");
+    };
+    simpanDaftar.onclick = function () {
+      var n = dNama.value.trim(), em = dEmail.value.trim().toLowerCase(), pw = dPass.value;
+      if (!n || !em || pw.length < 6) return alert("Lengkapi data. Password minimal 6 karakter.");
+      if (semuaUser().some(x => x.email.toLowerCase() === em)) return alert("Email sudah terdaftar.");
+      var b = ambil("penggunaBaru", []);
+      b.push({ id: 100 + b.length, nama: n, email: em, password: pw, role: "User" });
+      simpan("penggunaBaru", b);
+      alert("Pendaftaran berhasil. Silakan login.");
+      mDaftar.classList.remove("show"); email.value = em; pass.focus();
+    };
+  </script>
+</body>
+
+</html>

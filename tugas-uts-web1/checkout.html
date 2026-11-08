@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pemesanan - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1>Pemesanan</h1>
+    <div class="card">
+      <h2>Tambah Buku</h2>
+      <div class="row">
+        <div><label for="selBuku">Pilih buku</label><select id="selBuku"></select></div>
+        <div><label for="inQty">Jumlah</label><input id="inQty" type="number" min="1" value="1"></div>
+        <div style="align-self:end"><button id="bTambah" type="button">Tambah ke keranjang</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Keranjang</h2>
+      <div id="cart"></div>
+      <div class="total"><span>Total</span><span id="total">Rp 0</span></div>
+    </div>
+
+    <form id="fOrder" class="card">
+      <h2>Data Pemesan</h2>
+      <div class="row">
+        <div><label for="pNama">Nama</label><input id="pNama" required></div>
+        <div><label for="pTelp">No. telepon</label><input id="pTelp" type="tel" pattern="[0-9+]{8,15}"
+            title="8-15 digit angka" required></div>
+      </div>
+      <label for="pAlamat">Alamat pengiriman</label><textarea id="pAlamat" rows="2" required></textarea>
+      <div class="row">
+        <div><label for="pEks">Ekspedisi</label><select id="pEks">
+            <option>JNE</option>
+            <option>Pos Indonesia</option>
+            <option>J&amp;T</option>
+          </select></div>
+        <div><label for="pPaket">Jenis paket</label><select id="pPaket">
+            <option>Reguler</option>
+            <option>Kilat</option>
+          </select></div>
+      </div>
+      <h2 style="margin-top:1.2rem">Pembayaran</h2>
+      <div class="row">
+        <div><label for="pBayar">Metode</label><select id="pBayar">
+            <option>Transfer Bank</option>
+            <option>Virtual Account</option>
+            <option>E-Wallet</option>
+            <option>Bayar di Tempat</option>
+          </select></div>
+        <div><label for="pRek">Nomor rekening / akun (opsional)</label><input id="pRek"></div>
+      </div>
+      <p><button>Buat pesanan</button></p>
+    </form>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    pasangNav("checkout.html");
+    pNama.value = getUser().nama;
+    var keranjang = [];
+    var katalog = getKatalog();
+    selBuku.innerHTML = katalog.map((b, i) => `<option value="${i}">${b.namaBarang} (${b.harga})</option>`).join("");
+    function gambar() {
+      var out = "", t = 0;
+      if (!keranjang.length) out = '<p class="muted">Keranjang masih kosong. Pilih buku di atas atau buka <a href="stok.html">katalog</a>.</p>';
+      keranjang.forEach((k, i) => {
+        var sub = num(k.harga) * k.qty; t += sub;
+        out += `<div class="item"><div class="thumb">${k.cover ? `<img src="${k.cover}" alt="" onerror="this.remove()">` : k.namaBarang.charAt(0)}</div>
+    <div class="info"><h3 class="judul">${k.namaBarang}</h3><p class="meta">${k.kodeBarang} · ${k.harga}</p></div>
+    <div class="step"><button type="button" onclick="ubah(${i},${k.qty - 1})" aria-label="Kurangi jumlah">−</button><b>${k.qty}</b><button type="button" onclick="ubah(${i},${k.qty + 1})" aria-label="Tambah jumlah">+</button></div>
+    <div class="sub">${rp(sub)}</div><button type="button" class="danger" onclick="hapus(${i})">Hapus</button></div>`;
+      });
+      cart.innerHTML = out; total.textContent = rp(t); return t;
+    }
+    function ubah(i, v) { keranjang[i].qty = Math.max(1, parseInt(v) || 1); gambar(); }
+    function hapus(i) { keranjang.splice(i, 1); gambar(); }
+    bTambah.onclick = function () {
+      var b = katalog[selBuku.value], q = Math.max(1, parseInt(inQty.value) || 1);
+      var ada = keranjang.find(k => k.kodeBarang === b.kodeBarang);
+      if (ada) ada.qty += q; else keranjang.push(Object.assign({}, b, { qty: q }));
+      gambar();
+    };
+    fOrder.onsubmit = function (e) {
+      e.preventDefault();
+      if (!keranjang.length) return alert("Keranjang masih kosong.");
+      var o = ambil("orders", []);
+      var tgl = new Date();
+      var no = "2026" + String(1000 + o.length + 1);
+      o.push({
+        nomorDO: no, user: getUser().email, nama: pNama.value, telp: pTelp.value, alamat: pAlamat.value,
+        ekspedisi: pEks.value, paket: pPaket.value, bayar: pBayar.value, total: gambar(),
+        tanggal: tgl.toISOString().slice(0, 10), waktu: tgl.toLocaleString("id-ID"),
+        item: keranjang.map(k => ({ nama: k.namaBarang, qty: k.qty, harga: num(k.harga) }))
+      });
+      simpan("orders", o);
+      alert("Pesanan berhasil dibuat.\nNomor DO Anda: " + no);
+      location.href = "tracking.html?do=" + no;
+    };
+    var kq = new URLSearchParams(location.search).get("kode"), bk = katalog.findIndex(b => b.kodeBarang === kq);
+    if (bk >= 0) { selBuku.value = bk; keranjang.push(Object.assign({}, katalog[bk], { qty: 1 })); }
+    gambar();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Riwayat - Toko Buku</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="nav"></div>
+  <main>
+    <h1 id="judul"></h1>
+    <div class="card">
+      <div id="isi"></div>
+    </div>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    pasangNav("riwayat.html");
+    var mode = new URLSearchParams(location.search).get("v") === "laporan" ? "laporan" : "history";
+    var u = getUser();
+    var semua = getOrders();
+    var data = u.role === "Admin" ? semua : semua.filter(o => o.user === u.email);
+    var kosong = '<p class="muted">Belum ada transaksi. <a href="checkout.html">Buat pesanan pertama</a>.</p>';
+    if (mode === "history") {
+      judul.textContent = "History Transaksi";
+      isi.innerHTML = !data.length ? kosong : '<div class="wrap"><table><tr><th>No. DO</th><th>Tanggal</th><th>Pemesan</th><th>Item</th><th>Pembayaran</th><th>Total</th></tr>' +
+        data.slice().reverse().map(o => `<tr><td><a href="tracking.html?do=${o.nomorDO}">${o.nomorDO}</a></td><td>${o.tanggal}</td><td>${o.nama}</td>
+    <td>${o.item.map(i => i.nama + " x" + i.qty).join("<br>")}</td><td>${o.bayar}</td><td>${rp(o.total)}</td></tr>`).join("") + "</table></div>";
+    } else {
+      judul.textContent = "Laporan Pemesanan" + (u.role === "Admin" ? " (semua pengguna)" : "");
+      if (!data.length) isi.innerHTML = kosong;
+      else {
+        var per = {}, tot = 0, jml = 0;
+        data.forEach(o => { tot += o.total; o.item.forEach(i => { per[i.nama] = per[i.nama] || { q: 0, r: 0 }; per[i.nama].q += i.qty; per[i.nama].r += i.qty * i.harga; jml += i.qty; }); });
+        isi.innerHTML = `<p>Jumlah pesanan: <b>${data.length}</b> &nbsp; Buku terpesan: <b>${jml}</b> &nbsp; Total nilai: <b>${rp(tot)}</b></p>
+    <div class="wrap"><table><tr><th>Judul</th><th>Jumlah</th><th>Nilai</th></tr>` +
+          Object.keys(per).map(n => `<tr><td>${n}</td><td>${per[n].q}</td><td>${rp(per[n].r)}</td></tr>`).join("") + "</table></div>";
+      }
+    }
+  </script>
+</body>
+
+</html>
